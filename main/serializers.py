@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer
 from .models import News, CustomUser, Feedback
 
 class NewsSerializers(serializers.ModelSerializer):

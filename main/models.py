@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-# Create your models here.
 class Feedback(models.Model):
     name = models.CharField(max_length=155, null=False, verbose_name="Имя", help_text="Введите ваше имя",)
     email = models.EmailField(verbose_name="Электронная почта",help_text="Введите вашу почту")
@@ -21,8 +20,6 @@ class News(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
-from django.utils.text import slugify
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
