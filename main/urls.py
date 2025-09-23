@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import NewsListView, FeedbackView, RegisterView, CustomTokenObtainPairView
+from .views import NewsListView, FeedbackView, RegisterView, CustomTokenObtainPairView, MeView, GraduatesView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -32,8 +32,10 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('swagger.<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-   path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-   path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('auth/me/', MeView.as_view(), name='me'),
+    path('graduates/', GraduatesView.as_view(), name='graduates'),
 ]
 
 urlpatterns += router.urls

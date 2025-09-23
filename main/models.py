@@ -22,14 +22,37 @@ class News(models.Model):
 
 
 class CustomUser(AbstractUser):
+    INSTITUTION_CHOICES = [
+        ('MUIT', 'МУИТ'),
+        ('KITE', 'КИТЭ'),
+        ('COMTEHNO', 'КОМТЕХНО'),
+    ]
+    GRADUATE_STATUS_CHOICES = [
+        ('employed', 'Устроился'),
+        ('searching', 'Ищет работу'),
+        ('not_interested', 'Незаинтересован'),
+    ]
+
+
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, unique=True)
-    institution = models.CharField(max_length=255)
+    institution = models.CharField(
+        max_length=50,
+        choices=INSTITUTION_CHOICES,
+        verbose_name="Учебное заведение"
+    )
     graduation_year = models.PositiveIntegerField()
     patronymic = models.CharField(max_length=150, blank=True, null=True)
     about = models.TextField(blank=True, null=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
-
+    is_graduate = models.BooleanField(default=False, verbose_name="Выпускник")
+    graduate_status = models.CharField(
+        max_length=20,
+        choices=GRADUATE_STATUS_CHOICES,
+        default='searching',
+        verbose_name="Статус выпускника",
+        help_text="Текущее состояние выпускника"
+    )
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username", "first_name", "last_name", "phone_number", "institution", "graduation_year"]
 

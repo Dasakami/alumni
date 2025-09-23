@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import News, CustomUser, Feedback
-
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import CustomUser
 class NewsSerializers(serializers.ModelSerializer):
 
     title = serializers.CharField(help_text="Заголовок новости")
@@ -27,10 +29,6 @@ class FeedBackSerializers(serializers.ModelSerializer):
 
 
 
-# main/serializers.py
-from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
-from .models import CustomUser
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -61,3 +59,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         data['access'] = str(refresh.access_token)
         data['refresh'] = str(refresh)
         return data
+    
+class CustomUserSerializer(serializers.ModelSerializer):
+    graduate_status = serializers.ChoiceField(
+        choices=CustomUser.GRADUATE_STATUS_CHOICES,
+        required=False,
+        help_text="Статус выпускника (Устроился / Ищет работу / Незаинтересован)"
+    )
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id', 'email', 'first_name', 'last_name',
+            'patronymic', 'phone_number', 'institution',
+            'graduation_year', 'about', 'avatar', 'is_graduate', "graduate_status"
+        ]
+        read_only_fields = ['id', 'email', 'username', 'is_graduate']

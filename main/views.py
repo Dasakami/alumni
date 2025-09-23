@@ -1,4 +1,4 @@
-from rest_framework import permissions, status, viewsets
+from rest_framework import permissions, status, viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -8,7 +8,8 @@ from .models import News, Feedback, CustomUser
 from .serializers import (
     FeedBackSerializers, 
     NewsSerializers,
-    RegisterSerializer
+    RegisterSerializer,
+    CustomUserSerializer
 )
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -54,3 +55,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
+
+class MeView(generics.RetrieveUpdateAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+
+class GraduatesView(generics.ListAPIView):
+    queryset = CustomUser.objects.filter(is_graduate=True)
+    serializer_class = CustomUserSerializer
+    permission_classes = [AllowAny]
