@@ -4,7 +4,7 @@
 # 🎓 Alumni API (Django + DRF + PostgreSQL + Docker)
 
 Бэкенд для Alumni-платформы: новости, отзывы, регистрация и авторизация пользователей (JWT, Djoser).
-API полностью готово к локальной разработке и продакшн через Docker.
+API полностью готово к локальной разработке и продакшену через Docker.
 
 ---
 
@@ -16,6 +16,7 @@ API полностью готово к локальной разработке �
 * JWT (SimpleJWT)
 * Djoser — готовые эндпоинты для регистрации/логина
 * Swagger — документация API
+* Cloudinary — хранение медиа-файлов
 * Docker / Docker Compose
 
 ---
@@ -26,7 +27,7 @@ API полностью готово к локальной разработке �
 
 * [Python 3.12+](https://www.python.org/downloads/)
 * [Git](https://git-scm.com/downloads)
-* [Docker](https://www.docker.com/) и Docker Compose (если планируется запуск в контейнере)
+* [Docker](https://www.docker.com/) и Docker Compose
 * (опционально) PostgreSQL — если работаешь без Docker
 
 ---
@@ -42,7 +43,7 @@ cd alumni
 
 ## ⚡️ 3. Настройка окружения
 
-Создай файл **.env** в корне проекта (рядом с `docker-compose.yml`):
+Создай файл `.env` в корне проекта (рядом с `docker-compose.yml`):
 
 ```env
 DEBUG=True
@@ -57,9 +58,15 @@ POSTGRES_PORT=5432
 
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+# Cloudinary (создай аккаунт и получи данные)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-> ⚠️ Для продакшена: выстави `DEBUG=False`, придумай уникальный `SECRET_KEY` и используй реальные хосты в `ALLOWED_HOSTS`.
+> ⚠️ Для продакшена: `DEBUG=False`, уникальный `SECRET_KEY`, реальные хосты в `ALLOWED_HOSTS`.
+> ⚠️ Cloudinary: создайте аккаунт на [cloudinary.com](https://cloudinary.com/) и заполните переменные в `.env`.
 
 ---
 
@@ -78,9 +85,9 @@ pip install -r requirements.txt
 
 ---
 
-### 4.2 Настройка базы данных
+### 4.2 Настройка базы данных (PostgreSQL)
 
-Создай базу PostgreSQL и пользователя:
+Создай базу и пользователя:
 
 ```sql
 CREATE DATABASE alumni_db;
@@ -88,7 +95,7 @@ CREATE USER alumni_user WITH PASSWORD 'alumni_pass';
 GRANT ALL PRIVILEGES ON DATABASE alumni_db TO alumni_user;
 ```
 
-> Не забудь в `.env` поменять `POSTGRES_HOST` на `localhost`, если работаешь локально.
+> Если локально, не забудь поменять `POSTGRES_HOST=localhost` в `.env`.
 
 ---
 
@@ -98,6 +105,9 @@ GRANT ALL PRIVILEGES ON DATABASE alumni_db TO alumni_user;
 python manage.py migrate
 python manage.py collectstatic --noinput
 ```
+
+* `collectstatic` соберет все файлы из `static/` в `staticfiles/` для продакшена.
+* **Важно:** `staticfiles/` не должен попадать в Git (`.gitignore`).
 
 ---
 
@@ -115,12 +125,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-API будет доступно на:
-[http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+API будет доступно на: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ---
 
-## 🐳 5. Запуск через Docker
+## 🐳 5. Запуск через Docker (рекомендуется)
 
 ### 5.1 Сборка контейнеров
 
@@ -140,11 +149,20 @@ docker compose up -d
 docker compose exec web python manage.py createsuperuser
 ```
 
+### 5.4 Миграции и сборка статики внутри Docker
+
+```bash
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py collectstatic --noinput
+```
+
 После запуска:
 
 * API → [http://localhost:8000/api/](http://localhost:8000/api/)
 * Swagger → [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
 * Админка → [http://localhost:8000/admin/](http://localhost:8000/admin/)
+
+> Даже если пользователь работает через Docker, **все команды миграции и collectstatic должны выполняться внутри контейнера**.
 
 ---
 
@@ -155,7 +173,7 @@ docker compose exec web python manage.py createsuperuser
 * Получить токен: `POST /auth/login/`
 * Обновить токен: `POST /auth/token/refresh/`
 
-> В заголовках запроса указывать:
+В заголовках запроса:
 
 ```
 Authorization: Bearer <access_token>
@@ -189,12 +207,11 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 📝 Примечания
+## 📝 9. Примечания
 
-* Для продакшена **обязательно** поменяй `SECRET_KEY` и `POSTGRES_PASSWORD` в `.env`.
-* Если нужен автологин после регистрации — фронтенд хранит JWT (HttpOnly cookie или localStorage).
+* Для продакшена **обязательно** поменяй `SECRET_KEY`, `POSTGRES_PASSWORD` и Cloudinary данные в `.env`.
+* Frontend может хранить JWT в HttpOnly cookie или localStorage для автологина после регистрации.
 * Документация Swagger доступна по `/swagger/`.
+* **Статика:** `staticfiles/` собирается через `collectstatic`, не нужно хранить в Git.
 
 ---
-
-

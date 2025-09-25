@@ -9,7 +9,7 @@ __pycache__/
 .env
 venv/
 .envrc
-
+staticfiles/
 
 db.sqlite3
 /static/
