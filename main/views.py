@@ -1,4 +1,4 @@
-from rest_framework import permissions, status, viewsets, generics
+from rest_framework import permissions, status, viewsets, generics, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -9,7 +9,8 @@ from .serializers import (
     FeedBackSerializers, 
     NewsSerializers,
     RegisterSerializer,
-    CustomUserSerializer
+    CustomUserSerializer,
+    AdminUserSerializer
 )
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -68,3 +69,21 @@ class GraduatesView(generics.ListAPIView):
     queryset = CustomUser.objects.filter(is_graduate=True)
     serializer_class = CustomUserSerializer
     permission_classes = [AllowAny]
+
+
+class UserAdminViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = [permissions.IsAdminUser]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    search_fields = ['first_name', 'last_name', 'email', 'phone_number']
+    ordering_fields = ['graduation_year', 'is_graduate']
+    def get_queryset(self):
+        qs = super().get_queryset()
+        is_graduate = self.request.query_params.get('is_graduate')
+        if is_graduate is not None:
+            if is_graduate.lower() in ['true', '1']:
+                qs = qs.filter(is_graduate=True)
+            elif is_graduate.lower() in ['false', '0']:
+                qs = qs.filter(is_graduate=False)
+        return qs

@@ -4,12 +4,18 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-secret")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
-
+CORS_ALLOWED_ORIGINS = [
+    origin for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin
+]
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin
+]
+# CORS_ALLOW_CREDENTIALS = True  # если нужен доступ к cookie/session
 AUTH_USER_MODEL = 'main.CustomUser'
 
 INSTALLED_APPS = [
@@ -25,9 +31,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'drf_yasg',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -43,7 +52,7 @@ ROOT_URLCONF = 'alumni.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -57,23 +66,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'alumni.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dan9pfqk1',
+    'API_KEY': '146839736689131',
+    'API_SECRET': 'A271rHvOdWxMmOwMLDkTXagm3OE',
+}
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB"),
-        "USER": os.getenv("POSTGRES_USER"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "PORT": os.getenv("POSTGRES_PORT", 5432),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.getenv("POSTGRES_DB"),
+#         "USER": os.getenv("POSTGRES_USER"),
+#         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+#         "HOST": os.getenv("POSTGRES_HOST", "db"),
+#         "PORT": os.getenv("POSTGRES_PORT", 5432),
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -101,18 +118,18 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # теперь это совпадает с volume
+if DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles')]  # исходные файлы для разработки
 
 
 DJOSER = {
     "USER_CREATE_SERIALIZER": "main.serializers.CustomUserCreateSerializer",
     "USER_SERIALIZER": "main.serializers.CustomUserCreateSerializer",
-    "LOGIN_FIELD": "email",  # базовый логин по email
+    "LOGIN_FIELD": "email",  
 }
 
 AUTHENTICATION_BACKENDS = ['main.auth_backend.EmailOrPhoneBackend', 'django.contrib.auth.backends.ModelBackend']
@@ -124,10 +141,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
         'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAdminUser',
-        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [

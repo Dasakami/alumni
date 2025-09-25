@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import NewsListView, FeedbackView, RegisterView, CustomTokenObtainPairView, MeView, GraduatesView
+from .views import NewsListView, FeedbackView, RegisterView, CustomTokenObtainPairView, MeView, GraduatesView, UserAdminViewSet
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -25,6 +25,8 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 router.register(r'news', NewsListView, basename='news')
 router.register(r'feedback', FeedbackView, basename='feedback')
+router.register(r'auth/users', UserAdminViewSet, basename='admin-users')
+
 
 urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='auth_register'),  # регистрация с автологином

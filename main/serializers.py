@@ -74,3 +74,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'graduation_year', 'about', 'avatar', 'is_graduate', "graduate_status"
         ]
         read_only_fields = ['id', 'email', 'username', 'is_graduate']
+    
+class AdminUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'patronymic',
+            'phone_number', 'institution', 'graduation_year', 'about',
+            'avatar', 'is_graduate', 'graduate_status'
+        ]
+        read_only_fields = ['id', 'email', 'username'] 

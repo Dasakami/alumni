@@ -6,3 +6,9 @@ drf-yasg==1.21.7
 psycopg2-binary==2.9.9
 gunicorn==22.0.0
 Pillow==10.3.0
+django-cors-headers>=4.0
+python-dotenv>=1.0    
+setuptools>=65
+cloudinary>=1.41
+django-cloudinary-storage>=0.3
+whitenoise==6.11.0

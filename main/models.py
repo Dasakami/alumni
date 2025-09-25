@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from cloudinary_storage.storage import MediaCloudinaryStorage
 class Feedback(models.Model):
     name = models.CharField(max_length=155, null=False, verbose_name="Имя", help_text="Введите ваше имя",)
     email = models.EmailField(verbose_name="Электронная почта",help_text="Введите вашу почту")
@@ -15,7 +16,7 @@ class News(models.Model):
 
     title = models.CharField(max_length=300)
     content = models.TextField()
-    image = models.ImageField(upload_to='news/', blank=True, null=True)
+    image = models.ImageField(upload_to='news/', blank=True, null=True, storage=MediaCloudinaryStorage())
     sort = models.CharField(max_length=20, choices=CHOICE_TYPE, default='News')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,7 +45,7 @@ class CustomUser(AbstractUser):
     graduation_year = models.PositiveIntegerField()
     patronymic = models.CharField(max_length=150, blank=True, null=True)
     about = models.TextField(blank=True, null=True)
-    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, storage=MediaCloudinaryStorage())
     is_graduate = models.BooleanField(default=False, verbose_name="Выпускник")
     graduate_status = models.CharField(
         max_length=20,
